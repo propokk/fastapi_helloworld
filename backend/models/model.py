@@ -1,9 +1,8 @@
 from sqlalchemy import Float, DateTime, Boolean, Column, ForeignKey, Integer, String, Text
-from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.schema import ForeignKey
 
-from models.db.connections import Base
+from backend.models.db.connections import Base
 
 
 class User(Base):

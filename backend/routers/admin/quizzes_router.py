@@ -1,29 +1,53 @@
+from http.client import HTTPException
 from fastapi import APIRouter, Depends
 from typing import List, Optional
-from models.model import Quizzes
-from models.admin_models_dals import QuizzesDAL
-from models.db.connections import get_db
+from backend.models.admin_schemas import SetQuizzesBody, SetQuizzDB
+from backend.models.model import Quizzes
+from backend.models.admin_models_dals import QuizzesDAL
+from backend.models.db.connections import get_db
 from databases import Database
 
 
 quizz_router = APIRouter()
 
-@quizz_router.post("/quizz")
-async def create_quizz(title: str, description: str, is_active:bool, session: Database = Depends(get_db)):
-    quizz_dal = QuizzesDAL(session)
-    return await quizz_dal.create_quizz(title, description, is_active)
+@quizz_router.post("/quizz", response_model=SetQuizzDB)
+async def create_quizz(payload: SetQuizzesBody, session: Database = Depends(get_db)):
+    #quizz_dal = QuizzesDAL(session)
+    quizz_id = await QuizzesDAL.create_quizz(payload)
 
-@quizz_router.get("/quizz")
-async def get_all_quizzes(session: Database = Depends(get_db)) -> List[Quizzes]:
-    quizz_dal = QuizzesDAL(session)
-    return await quizz_dal.get_all_quizzes()
+    response_obj = {
+        "id": quizz_id,
+        "title": payload.title,
+        "description": payload.description,
+        "is_active": payload.is_active,
+    }
 
-@quizz_router.put("/quizz/{quizz_id}")
-async def update_quizz(quizz_id: int, title: Optional[str] = None, description: Optional[str] = None, session: Database = Depends(get_db)):
-    quizz_dal = QuizzesDAL(session)
-    return await quizz_dal.update_quizz(quizz_id, title, description)
+    return response_obj
 
-@quizz_router.delete("/quizz/{quizz_id}")
-async def delete_quizz(quizz_id: int, title: Optional[str] = None, description: Optional[str] = None, session: Database = Depends(get_db)):
-    quizz_dal = QuizzesDAL(session)
-    return await quizz_dal.delete_quizz(quizz_id, title, description)
+@quizz_router.get("/quizz", response_model=SetQuizzDB)
+async def get_all_quizzes(session: Database = Depends(get_db)):
+    #quizz_dal = QuizzesDAL(session)
+    quizz = await QuizzesDAL.get_all_quizzes()
+    if not quizz:
+        raise HTTPException(status_code=404, detail="No quizzes was found")
+    return quizz
+
+@quizz_router.put("/quizz/{id}", response_model=SetQuizzDB)
+async def update_quizz(id: int, payload: SetQuizzesBody, session: Database = Depends(get_db)):
+    #quizz_dal = QuizzesDAL(session)
+
+    quizz_id = await QuizzesDAL.update_quizz(id, payload)
+
+    response_obj = {
+        "id": quizz_id,
+        "title": payload.title,
+        "description": payload.description,
+        "is_active": payload.is_active,
+    }
+
+    return response_obj
+
+@quizz_router.delete("/quizz/{id}")
+async def delete_quizz(id: int, session: Database = Depends(get_db)):
+    #quizz_dal = QuizzesDAL(session)
+    return await QuizzesDAL.delete_quizz(id)
