@@ -1,8 +1,6 @@
 from fastapi import FastAPI
+from .routers import hw_router
 
 app = FastAPI()
 
-
-@app.get("/")
-async def home():
-	return {"status": "Working"}
+app.include_router(hw_router.router)
