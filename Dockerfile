@@ -6,6 +6,6 @@ COPY ./requirements.txt /hw_code/requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r /hw_code/requirements.txt
 
-COPY ./backend /hw_code/backend
+COPY ./backend /hw_code
 
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
