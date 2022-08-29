@@ -5,6 +5,8 @@ services:
     image: bitnami/redis
     networks:
       - webnet
+    ports:
+      - "6379:6379"
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
   postgres:
