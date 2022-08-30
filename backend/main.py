@@ -1,10 +1,7 @@
-<<<<<<< HEAD
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from databases import Database
 from routers import router as hw_router
-from models.db.connections import get_db
 from core.config import settings
-from starlette.applications import Starlette
 
 app = FastAPI()
 
@@ -24,12 +21,5 @@ async def startup():
 	await database.connect()
 	await inject_db(app, database)
 
-app = Starlette(routes=hw_router.routes)
-=======
-from fastapi import FastAPI
-from routers import router as hw_router
-
-app = FastAPI()
 
 app.include_router(hw_router.router)
->>>>>>> origin/main

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from starlette.routing import Route
 
 async def home():
@@ -7,13 +6,3 @@ async def home():
 routes = [
 	Route("/", endpoint=home)
 ]
-=======
-from fastapi import APIRouter
-
-
-router = APIRouter()
-
-@router.get('/', tags=['home'])
-async def home():
-	return {"status": "Working"}
->>>>>>> origin/main
