@@ -1,5 +1,6 @@
 from typing import Any
 from core.config import settings
+from models.schemas import Auth_tokens
 
 import jwt
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -17,6 +18,7 @@ def verify_token(token: str, domain: str, audience: str) -> dict[str, Any]:
     """
     jwks_client = jwt.PyJWKClient(f"https://{domain}/.well-known/jwks.json")
     signing_key = jwks_client.get_signing_key_from_jwt(token).key
+    Auth_tokens.token = token
     return jwt.decode(
         token,
         signing_key,

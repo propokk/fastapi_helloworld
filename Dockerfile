@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 FROM python:3.10
 
 WORKDIR /hw_code
@@ -9,7 +8,6 @@ RUN pip install --no-cache-dir --upgrade -r /hw_code/requirements.txt
 
 COPY ./backend /hw_code
 
-=======
 FROM python:3.10
 
 WORKDIR /hw_code
@@ -20,5 +18,4 @@ RUN pip install --no-cache-dir --upgrade -r /hw_code/requirements.txt
 
 COPY ./backend /hw_code
 
->>>>>>> origin/main
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
