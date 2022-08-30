@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  redis:
+    image: bitnami/redis
+    networks:
+      - webnet
+    ports:
+      - "6379:6379"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+  postgres:
+    image: sameersbn/postgresql:12-20200524
+    networks:
+      - webnet
+    ports:
+      - "5432:5432"
+    environment:
+      - DB_USER=user
+      - DB_PASS=userpass
+      - DB_NAME=hw_db
+    command: "--wal_keep_segments=32 --logging_collector=off"
+    volumes:
+    - postgresql:/var/lib/docker/volumes/postgresql/_data
+
+networks:
+  webnet: 
+volumes:
+  postgresql:
+    external: true

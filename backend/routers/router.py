@@ -1,8 +1,8 @@
-from fastapi import APIRouter
+from starlette.routing import Route
 
-
-router = APIRouter()
-
-@router.get('/', tags=['home'])
 async def home():
 	return {"status": "Working"}
+
+routes = [
+	Route("/", endpoint=home)
+]
