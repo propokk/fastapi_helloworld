@@ -20,7 +20,6 @@ async def inject_db(app: FastAPI, db: Database):
 
 @app.on_event("startup")
 async def startup():
-	#print(settings.DATABASE_URL)
 	await database.connect()
 	await inject_db(app, database)
 
