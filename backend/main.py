@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from fastapi import FastAPI, Depends
 from databases import Database
 from routers import router as hw_router
@@ -24,3 +25,11 @@ async def startup():
 	await inject_db(app, database)
 
 app = Starlette(routes=hw_router.routes)
+=======
+from fastapi import FastAPI
+from routers import router as hw_router
+
+app = FastAPI()
+
+app.include_router(hw_router.router)
+>>>>>>> origin/main
