@@ -18,5 +18,3 @@ class User(SignUp_Request):
 class SignIn_Request(SignUp_Request):
 	id: int
 	
-class Auth_tokens(BaseModel):
-	token: str
