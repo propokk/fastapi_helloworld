@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.schema import ForeignKey
 
-from db.connections import Base
+from models.db.connections import Base
 
 
 class User(Base):
@@ -25,14 +25,14 @@ class Passwords(Base):
     hashed_password = Column(String, nullable=False)
 
 
-class Quiz_results(Base):
-    __tablename__ = "quiz_results"
+class Quizz_results(Base):
+    __tablename__ = "quizz_results"
 
     id = Column(Integer, primary_key=True)
     user_score = Column(Float, default=0, nullable=False)
     max_score = Column(Float, default=0, nullable=False)
     finished_at = Column(DateTime(timezone=True), server_default=func.now())
-    user_id = Column(ForeignKey("user.id"))
+    user = Column(String)
 
 
 class Questions(Base):
@@ -40,15 +40,15 @@ class Questions(Base):
 
     id = Column(Integer, primary_key=True)
     question_text = Column(Text, nullable=False)
-    quiz_id = Column(ForeignKey("quizzes.id"))
+    quizz_id = Column(ForeignKey("quizzes.id"))
 
 class Quizzes(Base):
     __tablename__ = "quizzes"
 
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
-    desciption = Column(Text, nullable=False)
-    is_active = Column(Boolean, nullable=False)
+    description = Column(Text, nullable=False)
+    is_active = Column(Boolean)
 
 
 class Categories(Base):
@@ -56,7 +56,7 @@ class Categories(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False, unique=True)
-    desciption = Column(Text)
+    description = Column(Text)
 
 
 class Answers(Base):
@@ -65,7 +65,7 @@ class Answers(Base):
     id = Column(Integer, primary_key=True)
     answer_text = Column(Text, nullable=False)
     question_id = Column(ForeignKey("questions.id"))
-    is_correct: Column(Boolean, nullable=False)
+    is_correct = Column(Boolean)
 
 
 class Question_categories(Base):
