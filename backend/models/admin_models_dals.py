@@ -3,6 +3,7 @@ from typing import List, Optional
 import sqlalchemy as sa
 from databases import Database
 
+
 from models.model import *
 from models.admin_schemas import (
     SetQuizzesBody, 
@@ -183,4 +184,5 @@ class QuestionCategoriesDAL():
     async def delete_question_category(self, question_category_id: int, question_id: Optional[int], category_id: Optional[int]):
         delete_question_category = sa.delete(Question_categories).where(Question_categories.id == question_category_id)
 
-        await self.db_session.fetch_one(query=delete_question_category)   
+        await self.db_session.fetch_one(query=delete_question_category) 
+

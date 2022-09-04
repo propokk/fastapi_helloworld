@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 import sqlalchemy as sa
 from sqlalchemy import and_
@@ -29,8 +29,9 @@ class UserQuizzDAL():
                 Questions.id == Question_categories.question_id)
         
         query = sa.select([Questions]).select_from(j).where(and_(Questions.quizz_id == quizz_id, Question_categories.category_id==category_id))
-
+        
         return [SetQuestionsBody(**data) for data in await self.db_session.fetch_all(query=query)]
+    
 
     async def send_answer(self, queston_id: int, answer_text: str):
 

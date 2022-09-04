@@ -40,3 +40,4 @@ class SetCategoriesBody(BaseModel):
 class SetQuestionCategoriesBody(BaseModel):
 	question_id: int
 	category_id: int
+
