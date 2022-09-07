@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import List
 
 class SetQuizzesBody(BaseModel):
     id: int
@@ -15,9 +16,9 @@ class SetQuestionsBody(BaseModel):
     id: int
     question_text: str
 
-class SetAnswerBody(BaseModel):
+class Answer(BaseModel):
+    question_id: int
     answer_text: str
-    is_correct: bool
 
-class SetResponseBody(SetAnswerBody):
-    sub: str
+class SetFinalAnswerBody(BaseModel):
+    answers: List[Answer]

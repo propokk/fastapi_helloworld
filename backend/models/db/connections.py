@@ -12,4 +12,5 @@ def get_db(request: Request) -> Database:
 def get_redis(request: Request):
 	return request.app.state.redis
 
+
 Base = declarative_base()

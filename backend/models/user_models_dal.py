@@ -3,6 +3,7 @@ from typing import List
 import sqlalchemy as sa
 from sqlalchemy import and_
 from databases import Database
+from redis import Redis
 
 from models.model import *
 from models.user_schemas import *
@@ -30,11 +31,7 @@ class UserQuizzDAL():
         
         query = sa.select([Questions]).select_from(j).where(and_(Questions.quizz_id == quizz_id, Question_categories.category_id==category_id))
         
+
         return [SetQuestionsBody(**data) for data in await self.db_session.fetch_all(query=query)]
     
 
-    async def send_answer(self, queston_id: int, answer_text: str):
-
-        query = sa.select([Answers]).where(and_(Answers.question_id == queston_id, Answers.answer_text == answer_text))
-
-        return [SetAnswerBody(**data) for data in await self.db_session.fetch_all(query=query)]

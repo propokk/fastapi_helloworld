@@ -3,13 +3,13 @@ version: "3.8"
 services:
   redis:
     image: bitnami/redis
+    hostname: redis
     networks:
       - webnet
     ports:
       - "6379:6379"
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
-      - REDIS_URL=redis://redis:6379
   postgres:
     image: sameersbn/postgresql:12-20200524
     networks:
