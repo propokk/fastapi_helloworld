@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from databases import Database
-from routers import router as hw_router
-from routers.admin import answers_router, categories_router, question_categories_router, questions_router, quizzes_router
-from core.config import settings
+from backend.routers import router as hw_router
+from backend.routers.admin import answers_router, categories_router, question_categories_router, questions_router, quizzes_router
+from backend.core.config import settings
 from starlette.routing import Mount
 from redis import Redis 
 
@@ -29,9 +29,9 @@ async def startup():
 	inject_db(app, database, r)
 
 
-app.include_router(hw_router.router)
-app.include_router(answers_router.answer_router)
-app.include_router(categories_router.category_router)
-app.include_router(question_categories_router.question_category_router)
-app.include_router(questions_router.questions_router)
-app.include_router(quizzes_router.quizz_router)
+app.include_router(hw_router.router, tags=["user"])
+app.include_router(quizzes_router.quizz_router, tags=["quizzes"])
+app.include_router(questions_router.questions_router, tags=["questions"])
+app.include_router(answers_router.answer_router, tags=["answers"])
+app.include_router(categories_router.category_router, tags=["categories"])
+app.include_router(question_categories_router.question_category_router, tags=["question categories"])
