@@ -1,3 +1,4 @@
+from http.client import HTTPException
 from typing import List
 
 from fastapi import APIRouter, Depends, Response, status
@@ -9,15 +10,15 @@ from redis import Redis
 import sqlalchemy as sa
 from sqlalchemy import and_
 
-from authorization.auth import verify_token
+from backend.authorization.auth import verify_token
 
 import os
 import pandas as pd
-from models.user_schemas import SetFinalAnswerBody
-from core.config import settings
-from models.db.connections import get_db, get_redis
-from models.model import Categories, Questions, Quizzes, Quizz_results, Answers, Question_categories
-from models.user_models_dal import UserQuizzDAL
+from backend.models.user_schemas import Answer, SetChooseQuestionBody, SetFinalAnswerBody, SetQuestionsBody, SetQuizzesBody
+from backend.core.config import settings
+from backend.models.db.connections import get_db, get_redis
+from backend.models.model import Categories, Questions, Quizzes, Quizz_results, Answers, Question_categories
+from backend.models.user_models_dal import UserQuizzDAL
 
 
 router = APIRouter()
@@ -26,7 +27,7 @@ security = HTTPBearer()
 AUTH0_DOMAIN = settings.AUTH0_DOMAIN
 AUTH0_AUDIENCE = settings.AUTH0_AUDIENCE
 
-@router.get("/quizzes")
+@router.get("/quizzes", response_model=SetQuizzesBody)
 async def get_all_quizzes(response: Response,
 					session: Database = Depends(get_db), 
 					token: HTTPAuthorizationCredentials = Depends(security)) -> List[Quizzes]:
@@ -37,9 +38,11 @@ async def get_all_quizzes(response: Response,
 		response.status_code = status.HTTP_400_BAD_REQUEST
 		return result
 
-	user_quizz_dal = UserQuizzDAL(session)
-
-	return await user_quizz_dal.get_all_quizzes()
+	#user_quizz_dal = UserQuizzDAL(session)
+	quizz = await UserQuizzDAL.get_all_quizzes_for_user()
+	if not quizz:
+		raise HTTPException(status_code=404, detail="No quizzes was found")
+	return quizz
 
 @router.get("/quizzes/categories")
 async def get_all_categories(response: Response,
@@ -52,15 +55,16 @@ async def get_all_categories(response: Response,
 		response.status_code = status.HTTP_400_BAD_REQUEST
 		return result
 
-	user_quizz_dal = UserQuizzDAL(session)
+	#user_quizz_dal = UserQuizzDAL(session)
+	categories = await UserQuizzDAL.get_all_categories_for_user()
+	if not categories:
+		raise HTTPException(status_code=404, detail="No quizzes was found")
+	return categories
 
-	return await user_quizz_dal.get_all_categories()
 
-
-
-@router.post("/quizzes/categories/questions")
+@router.post("/quizzes/categories/questions", response_model=SetQuestionsBody)
 async def get_all_questions(response: Response,
-					quizz_id: int, category_id: int,
+					payload: SetChooseQuestionBody,
 					session: Database = Depends(get_db), 
 					token: HTTPAuthorizationCredentials = Depends(security)) -> List[Questions]:
 
@@ -74,42 +78,48 @@ async def get_all_questions(response: Response,
 	user_quizz_dal = UserQuizzDAL(session)
 
 	j = sa.join(Questions, Question_categories, Questions.id == Question_categories.question_id)
-	max_score = sa.select(sa.func.count(Questions.quizz_id)).select_from(j).where(and_(Questions.quizz_id == quizz_id, Question_categories.category_id==category_id))
-	count_q = list((dict(await session.fetch_one(query=max_score))).items())
+	max_score = sa.select(sa.func.count(Questions.quizz_id)).select_from(j).where(and_(Questions.quizz_id == payload.quizz_id, Question_categories.category_id==payload.category_id))
+	#count_q = list((dict(await session.fetch_one(query=max_score))).items())
 
-	query = sa.insert(Quizz_results).values(user=users_sub, user_score=0, max_score=count_q[0][1])
-	await session.fetch_one(query=query)
+	#query = sa.insert(Quizz_results).values(user=users_sub, user_score=0, max_score=count_q[0][1])
+	#await session.fetch_one(query=query)
 
+	question_id = await UserQuizzDAL.get_questions_for_user(payload)
 
-	return await user_quizz_dal.get_questions(quizz_id, category_id)
+	response_obj = {
+		"id": question_id,
+		"question_text": "Is your job important?",
+	}
+
+	return response_obj
 
 
 
 @router.post("/quizzes/categories/questions/answer")
 async def send_answer(response: Response,
-					data: SetFinalAnswerBody,
+					data: Answer,
 					session: Database = Depends(get_db),
 					additional: Redis = Depends(get_redis),
 					token: HTTPAuthorizationCredentials = Depends(security)) -> List[Questions]:
 
 	result = verify_token(token.credentials, AUTH0_DOMAIN, AUTH0_AUDIENCE)
-	users_sub = result.get("sub")
+	# users_sub = result.get("sub")
 	file_path = "users_csv.csv"
 
-	max_score = sa.select(Quizz_results.max_score).where(Quizz_results.user==users_sub)
-	max_score_list = list((dict(await session.fetch_one(query=max_score))).items())
+	# max_score = sa.select(Quizz_results.max_score).where(Quizz_results.user==users_sub)
+	# max_score_list = list((dict(await session.fetch_one(query=max_score))).items())
 
 	correct_check_list = []
-	for i in range(int(max_score_list[0][1])):
-		additional.append(users_sub,str({'question_id':(list(data.answers[i]))[0][1], 'answer_text':(list(data.answers[i]))[1][1]}))
-		correct_check = sa.select(Answers.is_correct).where(Answers.answer_text==(list(data.answers[i]))[1][1])
-		l = list((dict(await session.fetch_one(query=correct_check))).items())
-		if l[0][1] == True:
-			correct_check_list.append(l)
+	# for i in range(int(max_score_list[0][1])):
+	# 	additional.append(users_sub,str({'question_id':(list(data.answers[i]))[0][1], 'answer_text':(list(data.answers[i]))[1][1]}))
+	# 	correct_check = sa.select(Answers.is_correct).where(Answers.answer_text==(list(data.answers[i]))[1][1])
+		# l = list((dict(await session.fetch_one(query=correct_check))).items())
+		# if l[0][1] == True:
+		# 	correct_check_list.append(l)
 	
-	additional.expire(users_sub, 172800)
-	query = sa.update(Quizz_results).where(Quizz_results.user==users_sub).values(user_score=len(correct_check_list))
-	await session.fetch_one(query=query)
+	# additional.expire(users_sub, 172800)
+	# query = sa.update(Quizz_results).where(Quizz_results.user==users_sub).values(user_score=len(correct_check_list))
+	# await session.fetch_one(query=query)
 
 
 	if result.get("status"):
@@ -117,12 +127,17 @@ async def send_answer(response: Response,
 		return result
 
 
-	if additional.exists(users_sub) == 1:
-		query = additional.get(users_sub)
-		with open('users_csv.csv', 'w', newline='') as fp:
-			fp.write(f"{query}{os.linesep}")
+	# if additional.exists(users_sub) == 1:
+	# 	query = additional.get(users_sub)
+	# 	with open('users_csv.csv', 'w', newline='') as fp:
+	# 		fp.write(f"{query}{os.linesep}")
 
-	res = "{}/{}".format(len(correct_check_list), int(max_score_list[0][1]))
+	# res = "{}/{}".format(len(correct_check_list), int(max_score_list[0][1]))
+
+	res = {
+		"user_score": 0,
+		"max_score": 1,
+	}
 
 	return res
 

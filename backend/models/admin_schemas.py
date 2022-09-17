@@ -1,22 +1,4 @@
-from pydantic import BaseModel, Field
-from datetime import datetime
-
-
-class SignUp_Request(BaseModel):
-	id: int
-	email: str = Field(min_length=1)
-	name: str
-	password: str = Field(min_length=1)
-
-
-class User(SignUp_Request):
-	id: int
-	is_superuser: bool = Field(default_factory=False)
-	created_at: datetime = Field(default_factory=datetime.now)
-
-
-class SignIn_Request(SignUp_Request):
-	id: int
+from pydantic import BaseModel
 	
 
 class SetQuizzesBody(BaseModel):
@@ -24,20 +6,36 @@ class SetQuizzesBody(BaseModel):
 	description: str
 	is_active: bool
 
+class SetQuizzDB(SetQuizzesBody):
+	id: int
+
 class SetQuestionsBody(BaseModel):
 	question_text: str
 	quizz_id: int
 
-class SetAnswersBody(BaseModel):
-	answer_text: str
-	questin_id: int
-	is_correct: bool
+class SetQuestionDB(SetQuestionsBody):
+	id: int
+
+class SetQuestionCategoriesBody(BaseModel):
+	question_id: int
+	category_id: int
+
+class SetQuestionCategoryDB(SetQuestionCategoriesBody):
+	id: int
+
 
 class SetCategoriesBody(BaseModel):
 	name: str
 	description: str
 
-class SetQuestionCategoriesBody(BaseModel):
+class SetCategoryDB(SetCategoriesBody):
+	id: int
+
+class SetAnswersBody(BaseModel):
+	answer_text: str
 	question_id: int
-	category_id: int
+	is_correct: bool
+
+class SetAnswerDB(SetAnswersBody):
+	id: int
 

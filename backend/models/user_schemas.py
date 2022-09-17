@@ -12,6 +12,10 @@ class SetCategoriesBody(BaseModel):
     name: str
     description: str
 
+class SetChooseQuestionBody(BaseModel):
+    quizz_id: int
+    category_id: int
+
 class SetQuestionsBody(BaseModel):
     id: int
     question_text: str
